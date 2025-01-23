@@ -2,6 +2,7 @@ name: Deploy
 
 on:
   push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
@@ -43,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       environments: ${{ steps.environments.outputs.result }}
-    if: github.ref_name == 'main'
     needs: [lint,test]
     steps:
       - uses: actions/github-script@v6
@@ -66,7 +66,6 @@ jobs:
       matrix:
         environment: ${{ fromJSON(needs.detect-environments.outputs.environments) }}
     environment: ${{ matrix.environment }}
-    if: github.ref_name == 'main'
     steps:
       - uses: actions/checkout@v4
 
