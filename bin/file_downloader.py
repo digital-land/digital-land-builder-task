@@ -1,6 +1,7 @@
 """
-Module containing code to commplete multithreaded downloads using python. 
+Module containing code to commplete multithreaded downloads using python.
 """
+
 import logging
 from tqdm import tqdm
 
