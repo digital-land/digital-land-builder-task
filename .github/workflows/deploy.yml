@@ -9,26 +9,10 @@ on:
         description: The environment to deploy to.
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
-      - run: make init
-      - run: make lint
-
-
-
   detect-environments:
     runs-on: ubuntu-latest
     outputs:
       environments: ${{ steps.environments.outputs.result }}
-    if: github.ref_name == 'main'
-    needs: [build]
     steps:
       - uses: actions/github-script@v6
         id: environments
