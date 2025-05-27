@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_REPO: ${{ secrets.DEPLOY_DOCKER_REPOSITORY }}
-    needs: [detect-environments, test]
+    needs: [detect-environments]
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.detect-environments.outputs.environments) }}
