@@ -23,8 +23,16 @@ run-task :
 
 test: test-acceptance
 
-lint:
-	@
+lint: black-check flake8
+
+black-check:
+	black --check .
+
+black:
+	black .
+
+flake8:
+	flake8 .
 
 test-unit:
 	python -m pytest tests/unit

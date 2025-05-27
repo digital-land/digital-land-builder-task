@@ -19,10 +19,14 @@ for row in csv.DictReader(open("collection/source.csv")):
         datasets[dataset].add(organisation)
 
 
-#for organisation in sorted(organisations):
-    #if not (organisation.startswith("local-authority") or organisation.startswith("development-corporation") or organisation.startswith("national-park")): 
-        #print('"' + organisation + '":', sorted(organisations[organisation]))
+# for organisation in sorted(organisations):
+# if not (organisation.startswith("local-authority") or organisation.startswith("development-corporation") or organisation.startswith("national-park")):
+# print('"' + organisation + '":', sorted(organisations[organisation]))
 
 for organisation in sorted(organisations):
-    if (organisation.startswith("local-authority") or organisation.startswith("development-corporation") or organisation.startswith("national-park")): 
+    if (
+        organisation.startswith("local-authority")
+        or organisation.startswith("development-corporation")
+        or organisation.startswith("national-park")
+    ):
         print(organisation)

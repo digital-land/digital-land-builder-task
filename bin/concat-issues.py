@@ -7,26 +7,35 @@ import re
 import os
 import click
 
+
 @click.command()
 @click.option(
-    "--issues-dir", 
-    default="issues/", 
-    help="Directory where issue.csv will be stored"
+    "--issues-dir", default="issues/", help="Directory where issue.csv will be stored"
 )
 @click.option(
-    "--operational-issue-dir", 
-    default="performance/operational_issue/", 
-    help="Directory where operational-issue.csv will be stored"
+    "--operational-issue-dir",
+    default="performance/operational_issue/",
+    help="Directory where operational-issue.csv will be stored",
 )
 @click.option(
-    "--input-dir", 
-    default="var/issue/", 
-    help="Directory containing issue CSV files"
+    "--input-dir", default="var/issue/", help="Directory containing issue CSV files"
 )
 def process_issues(issues_dir, operational_issue_dir, input_dir):
     """Processes issue and operational issue CSV files and writes output."""
-    
-    fields = ["resource", "pipeline", "row-number", "field", "issue-type", "value", "message", "dataset", "entry-number", "line-number", "entity"]
+
+    fields = [
+        "resource",
+        "pipeline",
+        "row-number",
+        "field",
+        "issue-type",
+        "value",
+        "message",
+        "dataset",
+        "entry-number",
+        "line-number",
+        "entity",
+    ]
     os.makedirs(issues_dir, exist_ok=True)
 
     # Write to issue.csv
@@ -47,10 +56,22 @@ def process_issues(issues_dir, operational_issue_dir, input_dir):
                     w.writerow(row)
 
     # Write to operational-issue.csv
-    operational_fields = ["dataset", "resource", "line-number", "entry-number", "field", "issue-type", "value", "message", "entry-date"]
+    operational_fields = [
+        "dataset",
+        "resource",
+        "line-number",
+        "entry-number",
+        "field",
+        "issue-type",
+        "value",
+        "message",
+        "entry-date",
+    ]
     os.makedirs(operational_issue_dir, exist_ok=True)
 
-    with open(os.path.join(operational_issue_dir, "operational-issue.csv"), "w", newline="") as f:
+    with open(
+        os.path.join(operational_issue_dir, "operational-issue.csv"), "w", newline=""
+    ) as f:
         w = csv.DictWriter(f, operational_fields)
         w.writeheader()
 
@@ -58,6 +79,7 @@ def process_issues(issues_dir, operational_issue_dir, input_dir):
             with open(path, newline="") as infile:
                 for row in csv.DictReader(infile):
                     w.writerow(row)
+
 
 if __name__ == "__main__":
     process_issues()

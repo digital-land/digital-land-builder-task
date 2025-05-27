@@ -46,6 +46,7 @@ def as_date(date):
 
     return dt.strftime("%Y-%m-%d")
 
+
 @click.command()
 @click.argument("dataset")
 @click.argument("output_path")
@@ -77,7 +78,6 @@ def process_data(dataset, output_path, paths):
                             row[col] = as_date(row[col])
 
                     writer.writerow(row)
-
 
 
 if __name__ == "__main__":

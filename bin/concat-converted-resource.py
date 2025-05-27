@@ -7,16 +7,17 @@ import re
 import os
 import click
 
+
 @click.command()
 @click.option(
     "--input-dir",
     default="var/converted-resource/",
-    help="Directory containing converted resource CSV files"
+    help="Directory containing converted resource CSV files",
 )
 @click.option(
     "--output-dir",
     default="converted-resource/",
-    help="Directory where the processed CSV file will be saved"
+    help="Directory where the processed CSV file will be saved",
 )
 def process_converted_resources(input_dir, output_dir):
     """Processes converted resource CSV files and writes output."""
@@ -41,9 +42,12 @@ def process_converted_resources(input_dir, output_dir):
                     if row["dataset"] != dataset:
                         print(f"Dataset mismatch. dir={dataset} file={row['dataset']}")
                     if row["resource"] != resource:
-                        print(f"Resource mismatch. dir={resource} file={row['resource']}")
+                        print(
+                            f"Resource mismatch. dir={resource} file={row['resource']}"
+                        )
 
                     writer.writerow(row)
+
 
 if __name__ == "__main__":
     process_converted_resources()

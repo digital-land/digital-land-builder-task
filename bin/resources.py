@@ -4,6 +4,7 @@ import sys
 import csv
 import click
 
+
 def get_resources(input_dir):
     endpoints = {}
     resources = {}
@@ -49,7 +50,7 @@ def get_resources(input_dir):
                 resource = row["resource"]
                 if resource in old_resources_map:
                     continue  # Skip old resources
-                
+
                 resources[resource] = row
                 resources[resource].setdefault("pipelines", {})
                 resources[resource]["endpoints"] = row["endpoints"].split(";")
@@ -59,7 +60,9 @@ def get_resources(input_dir):
                     if endpoint in endpoints:
                         endpoints[endpoint].setdefault("resource", {})
                         endpoints[endpoint][resource] = True
-                        resources[resource]["collection"] = endpoints[endpoint]["collection"]
+                        resources[resource]["collection"] = endpoints[endpoint][
+                            "collection"
+                        ]
 
                         for pipeline in endpoints[endpoint]["pipelines"]:
                             resources[resource]["pipelines"][pipeline] = True
@@ -68,11 +71,10 @@ def get_resources(input_dir):
         sys.exit(1)
     return resources
 
+
 @click.command()
 @click.option(
-    "--input-dir", 
-    default="collection/", 
-    help="Directory containing the CSV files"
+    "--input-dir", default="collection/", help="Directory containing the CSV files"
 )
 def process_data(input_dir):
     """Process CSV files to map resources, endpoints, and pipelines."""
@@ -82,6 +84,7 @@ def process_data(input_dir):
         collection = resources[resource]["collection"]
         for pipeline in resources[resource]["pipelines"]:
             print(collection, pipeline, resource)
+
 
 if __name__ == "__main__":
     process_data()

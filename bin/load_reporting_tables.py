@@ -6,17 +6,16 @@ import sys
 import logging
 import sqlite3
 
-tables = {
-}
+tables = {}
 
-indexes = {
-}
+indexes = {}
 
 
 def fetch_historic_endpoints_data_from_dl(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
         s.organisation,
         o.name,
@@ -51,7 +50,8 @@ def fetch_historic_endpoints_data_from_dl(db_path):
 
     ORDER BY
         s.organisation, o.name, o.dataset, s.collection, sp.pipeline, latest_log_entry_date DESC
-    """)
+    """
+    )
     data = cursor.fetchall()
     conn.close()
     return data
@@ -60,7 +60,8 @@ def fetch_historic_endpoints_data_from_dl(db_path):
 def fetch_latest_endpoints_data_from_dl(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT * 
             from (
             SELECT
@@ -114,18 +115,22 @@ def fetch_latest_endpoints_data_from_dl(db_path):
                 s.organisation, o.name, o.dataset, s.collection, sp.pipeline, endpoint_entry_date DESC
             ) t1
         where t1.rn = 1 
-    """)
+    """
+    )
     data = cursor.fetchall()
     conn.close()
     return data
 
 
-def create_reporting_tables(historic_endpoints_data, latest_endpoint_data, performance_db_path):
+def create_reporting_tables(
+    historic_endpoints_data, latest_endpoint_data, performance_db_path
+):
     conn = sqlite3.connect(performance_db_path)
     cursor = conn.cursor()
-    
+
     # Create the reporting_historic_endpoints table
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS reporting_historic_endpoints (
             organisation TEXT,
             name TEXT,
@@ -146,16 +151,21 @@ def create_reporting_tables(historic_endpoints_data, latest_endpoint_data, perfo
             resource_start_date TEXT,
             resource_end_date TEXT
         )
-    """)
-    cursor.executemany("""
+    """
+    )
+    cursor.executemany(
+        """
             INSERT INTO reporting_historic_endpoints (
                 organisation, name, organisation_name, dataset, collection, pipeline, endpoint, endpoint_url, documentation_url, licence, latest_status, latest_exception, resource, 
                 latest_log_entry_date, endpoint_entry_date, endpoint_end_date, resource_start_date, resource_end_date
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, historic_endpoints_data)
+        """,
+        historic_endpoints_data,
+    )
 
-     # Create the reporting_latest_endpoints table
-    cursor.execute("""
+    # Create the reporting_latest_endpoints table
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS reporting_latest_endpoints (
             organisation TEXT,
             name TEXT,
@@ -177,30 +187,41 @@ def create_reporting_tables(historic_endpoints_data, latest_endpoint_data, perfo
             resource_end_date TEXT,
             rn INTEGER
         )
-    """)
-    
+    """
+    )
+
     # Insert data into reporting_latest_endpoints
-    cursor.executemany("""
+    cursor.executemany(
+        """
             INSERT INTO reporting_latest_endpoints (
                 organisation, name, organisation_name, dataset, collection, pipeline, endpoint, endpoint_url, licence, latest_status, days_since_200, latest_exception, resource, 
                 latest_log_entry_date, endpoint_entry_date, endpoint_end_date, resource_start_date, resource_end_date, rn
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, latest_endpoint_data)
-
+        """,
+        latest_endpoint_data,
+    )
 
     conn.commit()
     conn.close()
 
+
 if __name__ == "__main__":
     level = logging.INFO
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
-    
-    performance_db_path = sys.argv[1] if len(sys.argv) > 1 else "dataset/performance.sqlite3"
-    digital_land_db_path = sys.argv[2] if len(sys.argv) > 2 else "dataset/digital-land.sqlite3"
-    
-    # Fetch data from digital-land database
-    historic_endpoints_data = fetch_historic_endpoints_data_from_dl(digital_land_db_path)
-    latest_endpoints_data = fetch_latest_endpoints_data_from_dl(digital_land_db_path)
-    
-    create_reporting_tables(historic_endpoints_data,latest_endpoints_data,performance_db_path)
 
+    performance_db_path = (
+        sys.argv[1] if len(sys.argv) > 1 else "dataset/performance.sqlite3"
+    )
+    digital_land_db_path = (
+        sys.argv[2] if len(sys.argv) > 2 else "dataset/digital-land.sqlite3"
+    )
+
+    # Fetch data from digital-land database
+    historic_endpoints_data = fetch_historic_endpoints_data_from_dl(
+        digital_land_db_path
+    )
+    latest_endpoints_data = fetch_latest_endpoints_data_from_dl(digital_land_db_path)
+
+    create_reporting_tables(
+        historic_endpoints_data, latest_endpoints_data, performance_db_path
+    )

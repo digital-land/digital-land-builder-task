@@ -19,17 +19,17 @@ from file_downloader import download_urls
 @click.option(
     "--spec-dir",
     default="specification",
-    help="Directory containing the dataset specification"
+    help="Directory containing the dataset specification",
 )
 @click.option(
     "--cache-dir",
     default="var/expectations",
-    help="Directory to store downloaded expectation files"
+    help="Directory to store downloaded expectation files",
 )
 @click.option(
     "--output-dir",
     default="expectation",
-    help="Directory to store the final expectation CSV"
+    help="Directory to store the final expectation CSV",
 )
 def process_expectations(spec_dir, cache_dir, output_dir):
     """Fetch expectation Parquet files and convert them to CSV."""
@@ -47,9 +47,7 @@ def process_expectations(spec_dir, cache_dir, output_dir):
     for dataset_obj in datasets.values():
         if dataset_obj["collection"]:
             dataset = dataset_obj["dataset"]
-            url = (
-                f"https://files.planning.data.gov.uk/log/expectation/dataset={dataset}/{dataset}.parquet?version={timestamp}"
-            )
+            url = f"https://files.planning.data.gov.uk/log/expectation/dataset={dataset}/{dataset}.parquet?version={timestamp}"
             output_path = os.path.join(cache_dir, f"{dataset}.parquet")
             url_map[url] = output_path
 

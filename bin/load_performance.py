@@ -8,9 +8,7 @@ import sqlite3
 import pandas as pd
 import os
 
-indexes = {
-    "provision_summary": ["organisation", "organisation_name", "dataset"]
-}
+indexes = {"provision_summary": ["organisation", "organisation_name", "dataset"]}
 
 PARQUET_PERFORMANCE_DIR = os.getenv("PARQUET_PERFORMANCE_DIR")
 
@@ -75,6 +73,7 @@ def fetch_column_field_data(db_path):
     df_column_field = pd.read_sql_query(query, conn)
     return df_column_field
 
+
 def fetch_endpoint_summary(perf_path):
     conn = sqlite3.connect(perf_path)
     query = """
@@ -100,110 +99,209 @@ def fetch_endpoint_summary(perf_path):
     df_endpoint_summary = pd.read_sql_query(query, conn)
     return df_endpoint_summary
 
-def create_performance_tables(merged_data, cf_merged_data, endpoint_summary_data, performance_db_path):
+
+def create_performance_tables(
+    merged_data, cf_merged_data, endpoint_summary_data, performance_db_path
+):
     conn = sqlite3.connect(performance_db_path)
     column_field_table_name = "endpoint_dataset_resource_summary"
-    column_field_table_fields = ["organisation", "organisation_name", "cohort", "dataset", "collection", "pipeline", "endpoint", "endpoint_url", "resource", "resource_start_date",
-                                 "resource_end_date", "latest_log_entry_date", "mapping_field", "non_mapping_field"]
-    cf_merged_data_filtered = cf_merged_data[cf_merged_data['resource'] != ""]
-    cf_merged_data_filtered = cf_merged_data_filtered[cf_merged_data_filtered['endpoint'].notna(
-    )]
-    cf_merged_data_filtered[column_field_table_fields].to_parquet(os.path.join(PARQUET_PERFORMANCE_DIR,
-                                        "endpoint_dataset_resource_summary.parquet"), engine="pyarrow")
+    column_field_table_fields = [
+        "organisation",
+        "organisation_name",
+        "cohort",
+        "dataset",
+        "collection",
+        "pipeline",
+        "endpoint",
+        "endpoint_url",
+        "resource",
+        "resource_start_date",
+        "resource_end_date",
+        "latest_log_entry_date",
+        "mapping_field",
+        "non_mapping_field",
+    ]
+    cf_merged_data_filtered = cf_merged_data[cf_merged_data["resource"] != ""]
+    cf_merged_data_filtered = cf_merged_data_filtered[
+        cf_merged_data_filtered["endpoint"].notna()
+    ]
+    cf_merged_data_filtered[column_field_table_fields].to_parquet(
+        os.path.join(
+            PARQUET_PERFORMANCE_DIR, "endpoint_dataset_resource_summary.parquet"
+        ),
+        engine="pyarrow",
+    )
     cf_merged_data_filtered[column_field_table_fields].to_sql(
-        column_field_table_name, conn, if_exists="replace", index=False)
+        column_field_table_name, conn, if_exists="replace", index=False
+    )
 
     issue_table_name = "endpoint_dataset_issue_type_summary"
-    issue_table_fields = ["organisation", "organisation_name", "cohort", "dataset", "collection", "pipeline", "endpoint", "endpoint_url", "resource", "resource_start_date",
-                          "resource_end_date", "latest_log_entry_date", "count_issues", "date", "issue_type", "severity", "responsibility", "field"]
-    issue_data_filtered = merged_data[merged_data['resource'] != ""]
-    issue_data_filtered = issue_data_filtered[issue_data_filtered['endpoint'].notna(
-    )]
-    issue_data_filtered[issue_table_fields].to_parquet(os.path.join(PARQUET_PERFORMANCE_DIR,
-                                        "endpoint_dataset_issue_type_summary.parquet"), engine="pyarrow")
-    issue_data_filtered[issue_table_fields].to_sql(issue_table_name, conn, if_exists='replace', index=False, dtype={
-        'count_issues': 'INTEGER'})
+    issue_table_fields = [
+        "organisation",
+        "organisation_name",
+        "cohort",
+        "dataset",
+        "collection",
+        "pipeline",
+        "endpoint",
+        "endpoint_url",
+        "resource",
+        "resource_start_date",
+        "resource_end_date",
+        "latest_log_entry_date",
+        "count_issues",
+        "date",
+        "issue_type",
+        "severity",
+        "responsibility",
+        "field",
+    ]
+    issue_data_filtered = merged_data[merged_data["resource"] != ""]
+    issue_data_filtered = issue_data_filtered[issue_data_filtered["endpoint"].notna()]
+    issue_data_filtered[issue_table_fields].to_parquet(
+        os.path.join(
+            PARQUET_PERFORMANCE_DIR, "endpoint_dataset_issue_type_summary.parquet"
+        ),
+        engine="pyarrow",
+    )
+    issue_data_filtered[issue_table_fields].to_sql(
+        issue_table_name,
+        conn,
+        if_exists="replace",
+        index=False,
+        dtype={"count_issues": "INTEGER"},
+    )
 
     endpoint_summary_table_name = "endpoint_dataset_summary"
-    endpoint_summary_data.to_parquet(os.path.join(PARQUET_PERFORMANCE_DIR,
-                                        "endpoint_dataset_summary.parquet"), engine="pyarrow")
+    endpoint_summary_data.to_parquet(
+        os.path.join(PARQUET_PERFORMANCE_DIR, "endpoint_dataset_summary.parquet"),
+        engine="pyarrow",
+    )
     endpoint_summary_data.to_sql(
-        endpoint_summary_table_name, conn, if_exists='replace', index=False)
+        endpoint_summary_table_name, conn, if_exists="replace", index=False
+    )
 
     # Filter out endpoints with an end date as we don't want to count them in provision summary
-    final_result = merged_data.groupby(['organisation', 'organisation_name', 'dataset', 'provision_reason', 'provision_end_date']).agg(
-        active_endpoint_count=pd.NamedAgg(
-            column='endpoint',
-            aggfunc=lambda x: x[(merged_data.loc[x.index,
-                                                 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].nunique()
-        ),
-        error_endpoint_count=pd.NamedAgg(
-            column='endpoint',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'latest_status'] != '200') &
-                                ((merged_data.loc[x.index, 'endpoint_end_date'].isna()) |
-                                (merged_data.loc[x.index, 'endpoint_end_date'] == ""))].nunique()
-        ),
-        count_issue_error_internal=pd.NamedAgg(
-            column='count_issues',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'severity'] == 'error') &
-                                (merged_data.loc[x.index, 'responsibility'] == 'internal') &
-                                (merged_data.loc[x.index, 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].sum()
-        ),
-        count_issue_error_external=pd.NamedAgg(
-            column='count_issues',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'severity'] == 'error') &
-                                (merged_data.loc[x.index, 'responsibility'] == 'external') &
-                                (merged_data.loc[x.index, 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].sum()
-        ),
-        count_issue_warning_internal=pd.NamedAgg(
-            column='count_issues',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'severity'] == 'warning') &
-                                (merged_data.loc[x.index, 'responsibility'] == 'internal') &
-                                (merged_data.loc[x.index, 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].sum()
-        ),
-        count_issue_warning_external=pd.NamedAgg(
-            column='count_issues',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'severity'] == 'warning') &
-                                (merged_data.loc[x.index, 'responsibility'] == 'external') &
-                                (merged_data.loc[x.index, 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].sum()
-        ),
-        count_issue_notice_internal=pd.NamedAgg(
-            column='count_issues',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'severity'] == 'notice') &
-                                (merged_data.loc[x.index, 'responsibility'] == 'internal') &
-                                (merged_data.loc[x.index, 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].sum()
-        ),
-        count_issue_notice_external=pd.NamedAgg(
-            column='count_issues',
-            aggfunc=lambda x: x[(merged_data.loc[x.index, 'severity'] == 'notice') &
-                                (merged_data.loc[x.index, 'responsibility'] == 'external') &
-                                (merged_data.loc[x.index, 'endpoint_end_date'].isna() |
-                                 (merged_data['endpoint_end_date'] == ""))].sum()
+    final_result = (
+        merged_data.groupby(
+            [
+                "organisation",
+                "organisation_name",
+                "dataset",
+                "provision_reason",
+                "provision_end_date",
+            ]
         )
-    ).reset_index()
+        .agg(
+            active_endpoint_count=pd.NamedAgg(
+                column="endpoint",
+                aggfunc=lambda x: x[
+                    (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].nunique(),
+            ),
+            error_endpoint_count=pd.NamedAgg(
+                column="endpoint",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "latest_status"] != "200")
+                    & (
+                        (merged_data.loc[x.index, "endpoint_end_date"].isna())
+                        | (merged_data.loc[x.index, "endpoint_end_date"] == "")
+                    )
+                ].nunique(),
+            ),
+            count_issue_error_internal=pd.NamedAgg(
+                column="count_issues",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "severity"] == "error")
+                    & (merged_data.loc[x.index, "responsibility"] == "internal")
+                    & (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].sum(),
+            ),
+            count_issue_error_external=pd.NamedAgg(
+                column="count_issues",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "severity"] == "error")
+                    & (merged_data.loc[x.index, "responsibility"] == "external")
+                    & (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].sum(),
+            ),
+            count_issue_warning_internal=pd.NamedAgg(
+                column="count_issues",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "severity"] == "warning")
+                    & (merged_data.loc[x.index, "responsibility"] == "internal")
+                    & (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].sum(),
+            ),
+            count_issue_warning_external=pd.NamedAgg(
+                column="count_issues",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "severity"] == "warning")
+                    & (merged_data.loc[x.index, "responsibility"] == "external")
+                    & (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].sum(),
+            ),
+            count_issue_notice_internal=pd.NamedAgg(
+                column="count_issues",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "severity"] == "notice")
+                    & (merged_data.loc[x.index, "responsibility"] == "internal")
+                    & (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].sum(),
+            ),
+            count_issue_notice_external=pd.NamedAgg(
+                column="count_issues",
+                aggfunc=lambda x: x[
+                    (merged_data.loc[x.index, "severity"] == "notice")
+                    & (merged_data.loc[x.index, "responsibility"] == "external")
+                    & (
+                        merged_data.loc[x.index, "endpoint_end_date"].isna()
+                        | (merged_data["endpoint_end_date"] == "")
+                    )
+                ].sum(),
+            ),
+        )
+        .reset_index()
+    )
 
     # Convert counts to integers
-    final_result = final_result.astype({
-        'active_endpoint_count': 'int',
-        'error_endpoint_count': 'int',
-        'count_issue_error_internal': 'int',
-        'count_issue_error_external': 'int',
-        'count_issue_warning_internal': 'int',
-        'count_issue_warning_external': 'int',
-        'count_issue_notice_internal': 'int',
-        'count_issue_notice_external': 'int'
-    })
+    final_result = final_result.astype(
+        {
+            "active_endpoint_count": "int",
+            "error_endpoint_count": "int",
+            "count_issue_error_internal": "int",
+            "count_issue_error_external": "int",
+            "count_issue_warning_internal": "int",
+            "count_issue_warning_external": "int",
+            "count_issue_notice_internal": "int",
+            "count_issue_notice_external": "int",
+        }
+    )
 
     provision_table_name = "provision_summary"
-    final_result.to_parquet(os.path.join(PARQUET_PERFORMANCE_DIR,"provision_summary.parquet"), engine="pyarrow")
-    final_result.to_sql(provision_table_name, conn,
-                        if_exists='replace', index=False)
+    final_result.to_parquet(
+        os.path.join(PARQUET_PERFORMANCE_DIR, "provision_summary.parquet"),
+        engine="pyarrow",
+    )
+    final_result.to_sql(provision_table_name, conn, if_exists="replace", index=False)
     conn.close()
 
 
@@ -236,13 +334,14 @@ def fetch_reporting_data(db_path):
 
 if __name__ == "__main__":
     level = logging.INFO
-    logging.basicConfig(
-        level=level, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
 
-    performance_db_path = sys.argv[1] if len(
-        sys.argv) > 1 else "dataset/performance.sqlite3"
-    digital_land_db_path = sys.argv[2] if len(
-        sys.argv) > 2 else "dataset/digital-land.sqlite3"
+    performance_db_path = (
+        sys.argv[1] if len(sys.argv) > 1 else "dataset/performance.sqlite3"
+    )
+    digital_land_db_path = (
+        sys.argv[2] if len(sys.argv) > 2 else "dataset/digital-land.sqlite3"
+    )
 
     provision_data = fetch_provision_data(digital_land_db_path)
     issue_data = fetch_issue_data(digital_land_db_path)
@@ -250,17 +349,33 @@ if __name__ == "__main__":
     endpoint_summary_data = fetch_endpoint_summary(performance_db_path)
     reporting_data = fetch_reporting_data(performance_db_path)
     reporting_data["organisation"] = reporting_data["organisation"].str.replace(
-        "-eng", "")
+        "-eng", ""
+    )
 
-    provision_reporting_data = pd.merge(provision_data, reporting_data, left_on=[
-                                        "organisation", "dataset"], right_on=["organisation", "pipeline"], how="left")
-    issue_merged_data = pd.merge(provision_reporting_data, issue_data, left_on=[
-                                 "resource", "dataset"], right_on=["resource", "dataset"], how="left")
-    cf_merged_data = pd.merge(provision_reporting_data, cf_data, left_on=[
-                              "resource", "dataset"], right_on=["resource", "dataset"], how="left")
+    provision_reporting_data = pd.merge(
+        provision_data,
+        reporting_data,
+        left_on=["organisation", "dataset"],
+        right_on=["organisation", "pipeline"],
+        how="left",
+    )
+    issue_merged_data = pd.merge(
+        provision_reporting_data,
+        issue_data,
+        left_on=["resource", "dataset"],
+        right_on=["resource", "dataset"],
+        how="left",
+    )
+    cf_merged_data = pd.merge(
+        provision_reporting_data,
+        cf_data,
+        left_on=["resource", "dataset"],
+        right_on=["resource", "dataset"],
+        how="left",
+    )
     # Create new tables and insert data in performance database
     create_performance_tables(
-        issue_merged_data, cf_merged_data, endpoint_summary_data, performance_db_path)
+        issue_merged_data, cf_merged_data, endpoint_summary_data, performance_db_path
+    )
 
-    logging.info(
-        "Tables in 'performance' DB created successfully.")
+    logging.info("Tables in 'performance' DB created successfully.")

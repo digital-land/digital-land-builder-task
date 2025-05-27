@@ -15,13 +15,11 @@ PARQUET_SPECIFICATION_DIR = os.getenv("PARQUET_SPECIFICATION_DIR")
 
 tables = {
     "organisation": "var/cache",
-
     "source": "collection",
     "endpoint": "collection",
     "resource": "collection",
     "old-resource": "collection",
     "log": "collection",
-
     "award": "specification",
     "collection": "specification",
     "theme": "specification",
@@ -51,7 +49,6 @@ tables = {
     "datatype": "specification",
     "specification": "specification",
     "specification-status": "specification",
-
     "column": "pipeline",
     "combine": "pipeline",
     "concat": "pipeline",
@@ -63,10 +60,8 @@ tables = {
     "transform": "pipeline",
     "filter": "pipeline",
     "lookup": "pipeline",
-    "expectation":"expectation",
-
+    "expectation": "expectation",
     "issue": "issues",
-
     "column-field": "column-field",
     "converted-resource": "converted-resource",
 }
@@ -93,18 +88,25 @@ if __name__ == "__main__":
     level = logging.INFO
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
     path = sys.argv[1] if len(sys.argv) > 1 else "dataset/digital-land.sqlite3"
-    print("path is: ",path)
+    print("path is: ", path)
     package = SqlitePackage("digital-land", path=path, tables=tables, indexes=indexes)
     package.create()
 
     conn = sqlite3.connect(path)
 
     specification_df = pd.read_sql_query("SELECT * FROM specification", conn)
-    create_parquet_from_table(specification_df, "specification", PARQUET_SPECIFICATION_DIR)
-    operational_issue_log = pd.read_csv("performance/operational_issue/operational-issue.csv")
-    operational_issue_log.to_sql("operational_issue", conn, if_exists="replace", index=False)
-    
-    conn.execute("""
+    create_parquet_from_table(
+        specification_df, "specification", PARQUET_SPECIFICATION_DIR
+    )
+    operational_issue_log = pd.read_csv(
+        "performance/operational_issue/operational-issue.csv"
+    )
+    operational_issue_log.to_sql(
+        "operational_issue", conn, if_exists="replace", index=False
+    )
+
+    conn.execute(
+        """
     CREATE TABLE reporting_most_recent_log AS
     select t1.*
         from log t1 
@@ -114,9 +116,11 @@ if __name__ == "__main__":
             GROUP BY endpoint
             ) t2 on t1.endpoint = t2.endpoint
         where date(t1.entry_date) = t2.most_recent_log_date
-    """)
-    
-    conn.execute("""
+    """
+    )
+
+    conn.execute(
+        """
     CREATE TABLE reporting_historic_endpoints AS
     SELECT
         s.organisation,
@@ -151,9 +155,11 @@ if __name__ == "__main__":
 
     ORDER BY
         s.organisation, o.name, o.dataset, s.collection, sp.pipeline, latest_log_entry_date DESC
-    """)
+    """
+    )
 
-    conn.execute("""
+    conn.execute(
+        """
     CREATE TABLE reporting_latest_endpoints AS
         SELECT * 
             from (
@@ -208,5 +214,6 @@ if __name__ == "__main__":
                 s.organisation, o.name, o.dataset, s.collection, sp.pipeline, endpoint_entry_date DESC
             ) t1
         where t1.rn = 1              
-    """)
+    """
+    )
     conn.close()
