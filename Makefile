@@ -15,13 +15,8 @@ compile ::
 init ::
 	bats -v || sudo apt install bats -y
 	pip install --upgrade pip
-	ifneq (,$(wildcard requirements.txt))
-		pip3 install --upgrade -r requirements.txt
-	endif
-	ifneq (,$(wildcard setup.py))
-		pip install -e .$(PIP_INSTALL_PACKAGE)
-	endif
-		sqlite3 --version
+	pip3 install --upgrade -r requirements.txt
+	sqlite3 --version
 
 run-task : 
 	./task/run.sh;
