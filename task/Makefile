@@ -83,6 +83,7 @@ specification::
 	curl -qfsL '$(SOURCE_URL)/specification/main/specification/quality.csv' > specification/quality.csv
 
 init::	specification
+init:: $(CACHE_DIR)organisation.csv
 
 # local copy of organsiation datapackage
 $(CACHE_DIR)organisation.csv:
@@ -92,6 +93,7 @@ ifneq ($(COLLECTION_DATASET_BUCKET_NAME),)
 else
 	curl -qfs "$(DATASTORE_URL)organisation-collection/dataset/organisation.csv" > $(CACHE_DIR)organisation.csv
 endif
+
 
 clean::
 	rm -rf ./var
