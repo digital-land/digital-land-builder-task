@@ -19,27 +19,8 @@ init ::
 	sqlite3 --version
 
 run-task : 
-	./task/run.sh;
+	./run.sh;
 
-test: test-acceptance
-
-lint: black-check flake8
-
-black-check:
-	black --check .
-
-black:
-	black .
-
-flake8:
-	flake8 .
-
-test-unit:
-	python -m pytest tests/unit
-
-test-acceptance:
-	# run bats test of the script
-	bats tests/acceptance/test_run.bats
 
 ifeq ($(VAR_DIR),)
 VAR_DIR=var/
