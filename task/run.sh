@@ -23,10 +23,10 @@ if [ -z "$PARQUET_PERFORMANCE_DIR" ]; then
 fi
 
 if [ -z "$COLLECTION_DATASET_BUCKET_NAME" ]; then
-    echo "$COLLECTION_DATASET_BUCKET_NAME"
     echo "assign value to COLLECTION_DATASET_BUCKET_NAME to save to a bucket" 
 fi
 
+echo "collection bucket name: $COLLECTION_DATASET_BUCKET_NAME"
 echo Update makerules
 make makerules
 
