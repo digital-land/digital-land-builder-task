@@ -22,9 +22,19 @@ if [ -z "$PARQUET_PERFORMANCE_DIR" ]; then
   export PARQUET_PERFORMANCE_DIR="${PARQUET_DIR}performance/"
 fi
 
+if [ -z "$COLLECTION_DATASET_BUCKET_NAME" ]; then
+    echo "$COLLECTION_DATASET_BUCKET_NAME"
+    echo "assign value to COLLECTION_DATASET_BUCKET_NAME to save to a bucket" 
+fi
+
+echo Update makerules
+make makerules
 
 echo Install dependencies
 make init
+
+echo Clobber dataset
+make clobber
 
 mkdir -p dataset/
 
@@ -54,6 +64,23 @@ rm -f "$DB_PERF"
 mkdir -p "$PARQUET_PERFORMANCE_DIR"
 python3 bin/load_reporting_tables.py "$DB_PERF" "$DB"
 python3 bin/load_performance.py "$DB_PERF" "$DB"
+
+echo Check performance database
+make check-performance
+
+if [ -n "$COLLECTION_DATASET_BUCKET_NAME" ]; then
+    echo "$COLLECTION_DATASET_BUCKET_NAME"
+    echo Save datasets to $ENVIRONMENT S3
+else
+    echo "No COLLECTION_DATASET_BUCKET_NAME defined so dataset files not pushed to s3"
+fi
+
+# if [ -n "$COLLECTION_DATASET_BUCKET_NAME" ]; then
+#     echo Save Parquet files to $ENVIRONMENT S3
+#     make save-tables-to-parquet
+# else
+#     echo "No COLLECTION_DATASET_BUCKET_NAME defined so parquet files not pushed to s3"
+# fi
 
 echo "Digital Land build complete"
 

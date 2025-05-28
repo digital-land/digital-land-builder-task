@@ -1,3 +1,6 @@
+# prevent attempt to download centralised config
+PIPELINE_CONFIG_FILES=.dummy
+init::; touch .dummy
 
 .PHONY: \
 	compile \
@@ -22,6 +25,11 @@ run-task :
 	./run.sh;
 
 
+include makerules/makerules.mk
+include makerules/pipeline.mk
+include makerules/datapackage.mk
+include makerules/development.mk
+
 ifeq ($(VAR_DIR),)
 VAR_DIR=var/
 endif
@@ -30,7 +38,7 @@ ifeq ($(CACHE_DIR),)
 CACHE_DIR=$(VAR_DIR)cache/
 endif
 
-SOURCE_URL=https://raw.githubusercontent.com/digital-land
+SOURCE_URL=https://raw.githubusercontent.com/digital-land/
 
 ifeq ($(DATASTORE_URL),)
 DATASTORE_URL=https://files.planning.data.gov.uk/
