@@ -106,3 +106,7 @@ clobber::
 
 clobber-performance::
 	rm -rf $(DB_PERF)
+
+
+check-performance::
+	python check/performance.py
