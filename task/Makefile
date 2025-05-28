@@ -83,7 +83,6 @@ specification::
 	curl -qfsL '$(SOURCE_URL)/specification/main/specification/quality.csv' > specification/quality.csv
 
 init::	specification
-init:: $(CACHE_DIR)organisation.csv
 
 # local copy of organsiation datapackage
 $(CACHE_DIR)organisation.csv:
@@ -107,3 +106,7 @@ clobber::
 
 clobber-performance::
 	rm -rf $(DB_PERF)
+
+
+check-performance::
+	python check/performance.py
