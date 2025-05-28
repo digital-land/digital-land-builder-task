@@ -69,18 +69,18 @@ echo Check performance database
 make check-performance
 
 if [ -n "$COLLECTION_DATASET_BUCKET_NAME" ]; then
-    echo "$COLLECTION_DATASET_BUCKET_NAME"
-    echo Save datasets to $ENVIRONMENT S3
+    echo Save datasets to $COLLECTION_DATASET_BUCKET_NAME
+    make save-dataset
 else
     echo "No COLLECTION_DATASET_BUCKET_NAME defined so dataset files not pushed to s3"
 fi
 
-# if [ -n "$COLLECTION_DATASET_BUCKET_NAME" ]; then
-#     echo Save Parquet files to $ENVIRONMENT S3
-#     make save-tables-to-parquet
-# else
-#     echo "No COLLECTION_DATASET_BUCKET_NAME defined so parquet files not pushed to s3"
-# fi
+if [ -n "$COLLECTION_DATASET_BUCKET_NAME" ]; then
+    echo Save Parquet files to $COLLECTION_DATASET_BUCKET_NAME
+    make save-tables-to-parquet
+else
+    echo "No COLLECTION_DATASET_BUCKET_NAME defined so parquet files not pushed to s3"
+fi
 
 echo "Digital Land build complete"
 
