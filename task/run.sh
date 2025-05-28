@@ -22,8 +22,11 @@ if [ -z "$PARQUET_PERFORMANCE_DIR" ]; then
   export PARQUET_PERFORMANCE_DIR="${PARQUET_DIR}performance/"
 fi
 
-mkdir -p dataset/
 
+echo Install dependencies
+make init
+
+mkdir -p dataset/
 
 echo ">> First pass: downloading and concatenating data"
 mkdir -p dataset/
