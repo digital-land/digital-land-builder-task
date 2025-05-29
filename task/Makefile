@@ -24,6 +24,8 @@ init ::
 run-task : 
 	./run.sh;
 
+REPOSITORY=digital-land-builder
+HOISTED_COLLECTION_DATASET_BUCKET_NAME= $(COLLECTION_DATASET_BUCKET_NAME)
 
 include makerules/makerules.mk
 include makerules/pipeline.mk
