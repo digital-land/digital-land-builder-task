@@ -11,37 +11,45 @@ output_path = sys.argv[2]
 paths = sys.argv[3:]
 
 
-def as_timestamp(date):
+def as_timestamp(date, file_path=None):
     if not date:
         return ""
-    if len(date) >= 20:
-        dt = datetime.strptime(date[:19], "%Y-%m-%dT%H:%M:%S")
-    elif len(date) == 20:
-        dt = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
-    elif len(date) == 10:
-        dt = datetime.strptime(date, "%Y-%m-%d")
-    elif len(date) == 7:
-        dt = datetime.strptime(date, "%Y-%m")
-    elif len(date) == 4:
-        dt = datetime.strptime(date, "%Y")
-    else:
-        print("unknown date format", date)
+    try:
+        if len(date) >= 20:
+            dt = datetime.strptime(date[:19], "%Y-%m-%dT%H:%M:%S")
+        elif len(date) == 20:
+            dt = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+        elif len(date) == 10:
+            dt = datetime.strptime(date, "%Y-%m-%d")
+        elif len(date) == 7:
+            dt = datetime.strptime(date, "%Y-%m")
+        elif len(date) == 4:
+            dt = datetime.strptime(date, "%Y")
+        else:
+            raise ValueError(f"as_timestamp()-unknown date format: {date}")
+    except Exception as e:
+        location = f" (file={file_path})" if file_path else ""
+        print(f"[ERROR] Invalid date value {date!r}{location}: {e}", file=sys.stderr)
         sys.exit(2)
 
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def as_date(date):
+def as_date(date, file_path=None):
     if not date:
         return ""
-    if len(date) == 10:
-        dt = datetime.strptime(date, "%Y-%m-%d")
-    elif len(date) == 7:
-        dt = datetime.strptime(date, "%Y-%m")
-    elif len(date) == 4:
-        dt = datetime.strptime(date, "%Y")
-    else:
-        print("unknown date format", date)
+    try:
+        if len(date) == 10:
+            dt = datetime.strptime(date, "%Y-%m-%d")
+        elif len(date) == 7:
+            dt = datetime.strptime(date, "%Y-%m")
+        elif len(date) == 4:
+            dt = datetime.strptime(date, "%Y")
+        else:
+            raise ValueError(f"as_date()-unknown date format: {date}")
+    except Exception as e:
+        location = f" (file={file_path})" if file_path else ""
+        print(f"[ERROR] Invalid date value {date!r}{location}: {e}", file=sys.stderr)
         sys.exit(2)
 
     return dt.strftime("%Y-%m-%d")
@@ -73,9 +81,9 @@ def process_data(dataset, output_path, paths):
 
                     for col in row:
                         if col == "entry-date":
-                            row[col] = as_timestamp(row[col])
+                            row[col] = as_timestamp(row[col], file_path=path)
                         elif col.endswith("-date"):
-                            row[col] = as_date(row[col])
+                            row[col] = as_date(row[col], file_path=path)
 
                     writer.writerow(row)
 
