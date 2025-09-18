@@ -112,3 +112,8 @@ clobber-performance::
 
 check-performance::
 	python check/performance.py
+
+test: test-unit
+
+test-unit:
+	python -m pytest -v test/unit
