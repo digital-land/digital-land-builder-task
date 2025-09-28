@@ -35,7 +35,6 @@ jobs:
       matrix:
         environment: ${{ fromJSON(needs.detect-environments.outputs.environments) }}
     environment: ${{ matrix.environment }}
-    if: github.ref_name == 'main'
     steps:
       - uses: actions/checkout@v4
 
