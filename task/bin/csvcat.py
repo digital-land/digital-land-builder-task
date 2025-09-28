@@ -82,7 +82,8 @@ def process_data(dataset, output_path, paths):
                     except Exception as e:
                         location = f" file={path}" if path else ""
                         logger.error(f"Invalid date value in: {location}, row={row_num}, col={col}, value={row.get(col)} [ERROR]: {e}")
-                        sys.exit(2)
+                        logger.error(f'row data: {row})')
+                        raise e
 
 
 if __name__ == "__main__":
