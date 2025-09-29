@@ -43,27 +43,27 @@ mkdir -p dataset/
 ./bin/download-collection.sh
 ./bin/download-pipeline.sh
 ./bin/concat.sh
-python3 bin/download_issues.py
+python src/download_issues.py
 ./bin/download-operational-issues.sh
-python3 bin/download_column_field.py
-python3 bin/download_converted_resources.py
-python3 ./bin/concat-issues.py
-python3 ./bin/concat-column-field.py
-python3 ./bin/concat-converted-resource.py
-python3 bin/download_expectations.py
+python src/download_column_field.py
+python src/download_converted_resources.py
+python ./src/concat-issues.py
+python ./src/concat-column-field.py
+python ./src/concat-converted-resource.py
+python src/download_expectations.py
 
 
 echo ">> Second pass: generating $DB"
 rm -f "$DB"
 mkdir -p "$PARQUET_SPECIFICATION_DIR"
-python3 bin/load.py "$DB"
+python src/load.py "$DB"
 
 echo ">> Third pass: generating $DB_PERF"
 ./bin/download-digital-land.sh
 rm -f "$DB_PERF"
 mkdir -p "$PARQUET_PERFORMANCE_DIR"
-python3 bin/load_reporting_tables.py "$DB_PERF" "$DB"
-python3 bin/load_performance.py "$DB_PERF" "$DB"
+python src/load_reporting_tables.py "$DB_PERF" "$DB"
+python src/load_performance.py "$DB_PERF" "$DB"
 
 echo Check performance database
 make check-performance

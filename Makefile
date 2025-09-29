@@ -21,7 +21,7 @@ init ::
 	sqlite3 --version
 
 run-task : 
-	./run.sh;
+	./bin/run.sh;
 
 REPOSITORY=digital-land-builder
 HOISTED_COLLECTION_DATASET_BUCKET_NAME= $(COLLECTION_DATASET_BUCKET_NAME)
