@@ -110,7 +110,7 @@ clobber-performance::
 
 
 check-performance::
-	python check/performance.py
+	python src/performance.py
 
 test: test-unit
 
