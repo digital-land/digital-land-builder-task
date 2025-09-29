@@ -16,9 +16,8 @@ compile ::
 	python -m piptools compile --output-file=requirements/test-requirements.txt requirements/test-requirements.in
 
 init ::
-	bats -v || sudo apt install bats -y
 	pip install --upgrade pip
-	pip3 install --upgrade -r requirements.txt
+	pip install --upgrade -r requirements.txt
 	sqlite3 --version
 
 run-task : 
@@ -112,3 +111,8 @@ clobber-performance::
 
 check-performance::
 	python check/performance.py
+
+test: test-unit
+
+test-unit:
+	python -m pytest -v test/unit

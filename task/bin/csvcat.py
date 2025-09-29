@@ -5,6 +5,8 @@ import csv
 import hashlib
 from datetime import datetime
 import click
+import logging
+logger = logging.getLogger("__name__")
 
 dataset = sys.argv[1]
 output_path = sys.argv[2]
@@ -25,8 +27,7 @@ def as_timestamp(date):
     elif len(date) == 4:
         dt = datetime.strptime(date, "%Y")
     else:
-        print("unknown date format", date)
-        sys.exit(2)
+        raise ValueError(f"as_timestamp()-unknown date format: {date}")
 
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -41,8 +42,7 @@ def as_date(date):
     elif len(date) == 4:
         dt = datetime.strptime(date, "%Y")
     else:
-        print("unknown date format", date)
-        sys.exit(2)
+        raise ValueError(f"as_date()-unknown date format: {date}")
 
     return dt.strftime("%Y-%m-%d")
 
@@ -63,21 +63,27 @@ def process_data(dataset, output_path, paths):
         for path in paths:
             with open(path, "r", newline="") as f_in:
                 reader = csv.DictReader(f_in)
-                for row in reader:
-                    if dataset == "source" and row.get("source", ""):
-                        key = f"{row['collection']}|{row['organisation']}|{row['endpoint']}"
-                        row["source"] = hashlib.md5(key.encode()).hexdigest()
+                for row_num, row in enumerate(reader, start=2):
+                    try:
+                        if dataset == "source" and row.get("source", ""):
+                            key = f"{row['collection']}|{row['organisation']}|{row['endpoint']}"
+                            row["source"] = hashlib.md5(key.encode()).hexdigest()
 
-                    if "dataset" in fieldnames and not row.get("dataset", ""):
-                        row["dataset"] = row.get("pipeline", "")
+                        if "dataset" in fieldnames and not row.get("dataset", ""):
+                            row["dataset"] = row.get("pipeline", "")
 
-                    for col in row:
-                        if col == "entry-date":
-                            row[col] = as_timestamp(row[col])
-                        elif col.endswith("-date"):
-                            row[col] = as_date(row[col])
+                        for col in row:
+                            if col == "entry-date":
+                                row[col] = as_timestamp(row[col])
+                            elif col.endswith("-date"):
+                                row[col] = as_date(row[col])
 
-                    writer.writerow(row)
+                        writer.writerow(row)
+                    except Exception as e:
+                        location = f" file={path}" if path else ""
+                        logger.error(f"Invalid date value in: {location}, row={row_num}, col={col}, value={row.get(col)} [ERROR]: {e}")
+                        logger.error(f'row data: {row})')
+                        raise e
 
 
 if __name__ == "__main__":
