@@ -1,5 +1,5 @@
 import pytest
-from bin.csvcat import as_date, as_timestamp
+from src.csvcat import as_date, as_timestamp
 
 def test_as_timestamp_valid_formats():
     assert as_timestamp("2025-09-01") == "2025-09-01T00:00:00Z"

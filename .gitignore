@@ -33,3 +33,6 @@ converted-resource/
 # ignore databases
 *.db
 *.sqlite3
+
+# ignroe data directory
+data/
