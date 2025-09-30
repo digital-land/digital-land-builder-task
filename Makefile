@@ -19,6 +19,7 @@ init ::
 	pip install --upgrade pip
 	pip install --upgrade -r requirements.txt
 	sqlite3 --version
+	pre-commit install
 
 run-task : 
 	./bin/run.sh;
@@ -116,3 +117,14 @@ test: test-unit
 
 test-unit:
 	python -m pytest -v test/unit
+
+lint:black-check flake8
+
+black-check:
+	black --check .
+
+black:
+	black .
+
+flake8:
+	flake8 .

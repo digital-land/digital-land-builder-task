@@ -1,5 +1,6 @@
 black
 flake8
+pre-commit
 python-magic==0.4.24
 datasette
 csvkit
