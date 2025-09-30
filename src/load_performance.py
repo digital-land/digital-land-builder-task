@@ -27,7 +27,7 @@ def fetch_provision_data(db_path):
 def fetch_issue_data(db_path):
     conn = sqlite3.connect(db_path)
     query = """
-        select  
+        select
         count(*) as count_issues, strftime('%d-%m-%Y', 'now') as date,
         i.issue_type as issue_type, it.severity, it.responsibility, i.dataset, i.resource, i.field
         from issue i
@@ -59,7 +59,6 @@ def fetch_column_field_data(db_path):
                 WHEN cf.field in ('geometry', 'point') THEN null
                 ELSE NULL
             END), ',', ';') as non_mapping_field
-            
         from
             column_field cf
             inner join resource r on cf.resource = r.resource
@@ -77,10 +76,10 @@ def fetch_column_field_data(db_path):
 def fetch_endpoint_summary(perf_path):
     conn = sqlite3.connect(perf_path)
     query = """
-    select  organisation, 
+    select  organisation,
     dataset,
     endpoint,
-    endpoint_url, 
+    endpoint_url,
     documentation_url,
     resource,
     latest_status,
@@ -88,9 +87,9 @@ def fetch_endpoint_summary(perf_path):
     max(latest_log_entry_date) as latest_log_entry_date,
     endpoint_entry_date as entry_date,
     endpoint_end_date as end_date,
-    resource_start_date as latest_resource_start_date, 
+    resource_start_date as latest_resource_start_date,
     resource_end_date
-    from reporting_historic_endpoints    
+    from reporting_historic_endpoints
     where (endpoint_end_date = '' or endpoint_end_date is null) -- only active endpoints
     and (resource_end_date = '' or resource_end_date is null) -- only active resources
     GROUP BY organisation, dataset, endpoint
@@ -308,7 +307,7 @@ def create_performance_tables(
 def fetch_reporting_data(db_path):
     conn = sqlite3.connect(db_path)
     query = """
-        SELECT 
+        SELECT
             rhe.organisation,
             rhe.collection,
             rhe.pipeline,
@@ -323,7 +322,7 @@ def fetch_reporting_data(db_path):
             rhe.resource_start_date,
             rhe.resource_end_date,
             max(rhe.latest_log_entry_date) as latest_log_entry_date
-        FROM 
+        FROM
             reporting_historic_endpoints rhe
         GROUP BY rhe.organisation,rhe.collection, rhe.pipeline,rhe.endpoint
         order by rhe.organisation, rhe.collection
