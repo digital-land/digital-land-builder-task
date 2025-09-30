@@ -4,8 +4,6 @@
 
 
 import os
-import sys
-import logging
 import duckdb
 import click
 
@@ -60,7 +58,7 @@ def process_expectations(spec_dir, cache_dir, output_dir):
             f"""
             COPY (
                 SELECT * FROM parquet_scan('{cache_dir}/*.parquet', union_by_name=True)
-            ) 
+            )
             TO '{expectation_csv}' (FORMAT CSV, HEADER TRUE)
             """
         )

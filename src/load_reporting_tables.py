@@ -62,7 +62,7 @@ def fetch_latest_endpoints_data_from_dl(db_path):
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT * 
+        SELECT *
             from (
             SELECT
                 s.organisation,
@@ -84,7 +84,7 @@ def fetch_latest_endpoints_data_from_dl(db_path):
                 substring(e.end_date,1,10) as endpoint_end_date,
                 substring(r.start_date,1,10) as resource_start_date,
                 substring(r.end_date,1,10) as resource_end_date,
-            
+
                 row_number() over (partition by s.organisation,sp.pipeline order by e.entry_date desc, l.entry_date desc) as rn
 
             FROM
@@ -114,7 +114,7 @@ def fetch_latest_endpoints_data_from_dl(db_path):
             ORDER BY
                 s.organisation, o.name, o.dataset, s.collection, sp.pipeline, endpoint_entry_date DESC
             ) t1
-        where t1.rn = 1 
+        where t1.rn = 1
     """
     )
     data = cursor.fetchall()
@@ -140,7 +140,7 @@ def create_reporting_tables(
             pipeline TEXT,
             endpoint TEXT,
             endpoint_url TEXT,
-            documentation_url TEXT,       
+            documentation_url TEXT,
             licence TEXT,
             latest_status TEXT,
             latest_exception TEXT,
@@ -156,7 +156,7 @@ def create_reporting_tables(
     cursor.executemany(
         """
             INSERT INTO reporting_historic_endpoints (
-                organisation, name, organisation_name, dataset, collection, pipeline, endpoint, endpoint_url, documentation_url, licence, latest_status, latest_exception, resource, 
+                organisation, name, organisation_name, dataset, collection, pipeline, endpoint, endpoint_url, documentation_url, licence, latest_status, latest_exception, resource,
                 latest_log_entry_date, endpoint_entry_date, endpoint_end_date, resource_start_date, resource_end_date
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -194,7 +194,7 @@ def create_reporting_tables(
     cursor.executemany(
         """
             INSERT INTO reporting_latest_endpoints (
-                organisation, name, organisation_name, dataset, collection, pipeline, endpoint, endpoint_url, licence, latest_status, days_since_200, latest_exception, resource, 
+                organisation, name, organisation_name, dataset, collection, pipeline, endpoint, endpoint_url, licence, latest_status, days_since_200, latest_exception, resource,
                 latest_log_entry_date, endpoint_entry_date, endpoint_end_date, resource_start_date, resource_end_date, rn
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,

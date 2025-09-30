@@ -109,10 +109,10 @@ if __name__ == "__main__":
         """
     CREATE TABLE reporting_most_recent_log AS
     select t1.*
-        from log t1 
+        from log t1
         inner join (
             SELECT endpoint,max(date(entry_date)) as most_recent_log_date
-            FROM log 
+            FROM log
             GROUP BY endpoint
             ) t2 on t1.endpoint = t2.endpoint
         where date(t1.entry_date) = t2.most_recent_log_date
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         s.organisation,
         o.name,
         o.name as organisation_name,
-        o.dataset,         
+        o.dataset,
         s.collection,
         sp.pipeline,
         l.endpoint,
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     conn.execute(
         """
     CREATE TABLE reporting_latest_endpoints AS
-        SELECT * 
+        SELECT *
             from (
             SELECT
                 s.organisation,
@@ -183,7 +183,6 @@ if __name__ == "__main__":
                 e.end_date as endpoint_end_date,
                 r.start_date as resource_start_date,
                 r.end_date as resource_end_date,
-            
                 row_number() over (partition by s.organisation,sp.pipeline order by e.entry_date desc, l.entry_date desc) as rn
 
             FROM
@@ -213,7 +212,7 @@ if __name__ == "__main__":
             ORDER BY
                 s.organisation, o.name, o.dataset, s.collection, sp.pipeline, endpoint_entry_date DESC
             ) t1
-        where t1.rn = 1              
+        where t1.rn = 1
     """
     )
     conn.close()
