@@ -1,4 +1,4 @@
-name: Deploy
+name: Publish - ${{ github.head_ref || github.ref_name }} to ${{ inputs.environment || 'all' }} by @${{ github.actor }}
 
 on:
   push:
@@ -10,6 +10,10 @@ on:
         description: The environment to deploy to.
 
 jobs:
+
+  test:
+    uses: ./.github/workflows/test.yml
+
   detect-environments:
     runs-on: ubuntu-latest
     outputs:
@@ -30,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_REPO: ${{ secrets.DEPLOY_DOCKER_REPOSITORY }}
-    needs: [detect-environments]
+    needs: [detect-environments,test]
     strategy:
       matrix:
         environment: ${{ fromJSON(needs.detect-environments.outputs.environments) }}
