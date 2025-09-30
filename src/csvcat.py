@@ -6,6 +6,7 @@ import hashlib
 from datetime import datetime
 import click
 import logging
+
 logger = logging.getLogger("__name__")
 
 dataset = sys.argv[1]
@@ -81,8 +82,10 @@ def process_data(dataset, output_path, paths):
                         writer.writerow(row)
                     except Exception as e:
                         location = f" file={path}" if path else ""
-                        logger.error(f"Invalid date value in: {location}, row={row_num}, col={col}, value={row.get(col)} [ERROR]: {e}")
-                        logger.error(f'row data: {row})')
+                        logger.error(
+                            f"Invalid date value in: {location}, row={row_num}, col={col}, value={row.get(col)} [ERROR]: {e}"
+                        )
+                        logger.error(f"row data: {row})")
                         raise e
 
 
