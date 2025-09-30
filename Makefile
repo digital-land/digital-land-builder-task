@@ -116,7 +116,7 @@ check-performance::
 test: test-unit
 
 test-unit:
-	python -m pytest -v test/unit
+	python -m pytest -v tests/unit
 
 lint:black-check flake8
 
