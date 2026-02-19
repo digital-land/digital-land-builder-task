@@ -8,6 +8,7 @@ import click
 
 csv.field_size_limit(10 * 1024 * 1024)
 
+
 @click.command()
 @click.option(
     "--issues-dir", default="issues/", help="Directory where issue.csv will be stored"
