@@ -1,6 +1,6 @@
 import logging
 import sqlite3
-from digital_land.expectations.operation import check_columns
+from digital_land.expectations.operations.dataset import check_columns
 
 logger = logging.getLogger("__name__")
 
