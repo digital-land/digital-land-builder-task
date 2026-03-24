@@ -51,10 +51,14 @@ def process_issues(issues_dir, operational_issue_dir, input_dir):
             resource = m.group(2)
 
             with open(path, newline="") as infile:
-                for row in csv.DictReader(infile):
-                    row["resource"] = resource
-                    row["pipeline"] = pipeline
-                    w.writerow(row)
+                try:
+                    for row in csv.DictReader(infile):
+                        row["resource"] = resource
+                        row["pipeline"] = pipeline
+                        w.writerow(row)
+                except Exception as e:
+                    print(f"Error processing {path}: {e}")
+                    raise e
 
     # Write to operational-issue.csv
     operational_fields = [
