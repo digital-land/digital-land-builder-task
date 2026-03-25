@@ -3,6 +3,7 @@ Module containing code to commplete multithreaded downloads using python.
 """
 
 import logging
+import sys
 from tqdm import tqdm
 
 from pathlib import Path
@@ -38,9 +39,20 @@ def download_urls(url_map, max_threads=4):
             for url, output_path in url_map.items()
         }
         results = []
-        for future in tqdm(futures, desc="Downloading files"):
+        total = len(futures)
+        interactive = sys.stdout.isatty()
+        last_logged_pct = -1
+        for i, future in enumerate(
+            tqdm(futures, desc="Downloading files", disable=not interactive), start=1
+        ):
             try:
                 results.append(future.result())
             except Exception as e:
                 logger.errors(f"Error during download: {e}")
+            if not interactive:
+                pct = (i * 100) // total
+                milestone = (pct // 10) * 10
+                if milestone > last_logged_pct:
+                    logger.info(f"Download progress: {milestone}% ({i}/{total})")
+                    last_logged_pct = milestone
         return results

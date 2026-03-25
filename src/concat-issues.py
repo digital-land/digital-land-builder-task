@@ -5,6 +5,11 @@ import glob
 import re
 import os
 import click
+import logging
+
+logger = logging.getLogger("__name__")
+
+csv.field_size_limit(10 * 1024 * 1024)
 
 
 @click.command()
@@ -21,8 +26,6 @@ import click
 )
 def process_issues(issues_dir, operational_issue_dir, input_dir):
     """Processes issue and operational issue CSV files and writes output."""
-
-    csv.field_size_limit(10 * 1024 * 1024)
 
     fields = [
         "resource",
@@ -52,14 +55,13 @@ def process_issues(issues_dir, operational_issue_dir, input_dir):
 
             with open(path, newline="") as infile:
                 try:
-                    csv.field_size_limit(10 * 1024 * 1024)
                     for row in csv.DictReader(infile):
                         row["resource"] = resource
                         row["pipeline"] = pipeline
                         w.writerow(row)
                 except Exception as e:
-                    print(f"Error processing {path}: {e}")
-                    print(f"csv field size limit: {csv.field_size_limit()}")
+                    # general exception so we can log the file being processed
+                    logger.error(f"Error processing {path}: {e}")
                     raise e
 
     # Write to operational-issue.csv
