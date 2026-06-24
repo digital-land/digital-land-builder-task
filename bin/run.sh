@@ -40,11 +40,11 @@ mkdir -p dataset/
 
 echo ">> First pass: downloading and concatenating data"
 mkdir -p dataset/
-./bin/download-collection.sh
-./bin/download-pipeline.sh
+python src/download_collection.py
+python src/download_pipeline.py
 ./bin/concat.sh
 python src/download_issues.py
-./bin/download-operational-issues.sh
+python src/download_operational_issues.py
 python src/download_column_field.py
 python src/download_converted_resources.py
 python ./src/concat-issues.py
