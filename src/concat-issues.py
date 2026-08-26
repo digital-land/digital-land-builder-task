@@ -8,6 +8,9 @@ import click
 
 csv.field_size_limit(10 * 1024 * 1024)
 
+# Otherwise title-boundary creates 54 Million OSGB issues slowing down the issues table
+EXCLUDED_DATASETS = {"title-boundary"}
+
 
 @click.command()
 @click.option(
@@ -49,6 +52,9 @@ def process_issues(issues_dir, operational_issue_dir, input_dir):
 
             pipeline = m.group(1)
             resource = m.group(2)
+
+            if pipeline in EXCLUDED_DATASETS:
+                continue
 
             with open(path, newline="") as infile:
                 for row in csv.DictReader(infile):
