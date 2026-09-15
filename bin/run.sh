@@ -44,7 +44,6 @@ python src/download_collection.py
 python src/download_pipeline.py
 ./bin/concat.sh
 python src/download_issues.py
-python src/download_operational_issues.py
 python src/download_column_field.py
 python src/download_converted_resources.py
 python ./src/concat-issues.py
