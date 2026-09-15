@@ -17,15 +17,10 @@ EXCLUDED_DATASETS = {"title-boundary"}
     "--issues-dir", default="issues/", help="Directory where issue.csv will be stored"
 )
 @click.option(
-    "--operational-issue-dir",
-    default="performance/operational_issue/",
-    help="Directory where operational-issue.csv will be stored",
-)
-@click.option(
     "--input-dir", default="var/issue/", help="Directory containing issue CSV files"
 )
-def process_issues(issues_dir, operational_issue_dir, input_dir):
-    """Processes issue and operational issue CSV files and writes output."""
+def process_issues(issues_dir, input_dir):
+    """Processes issue CSV files and writes output."""
 
     fields = [
         "resource",
@@ -60,31 +55,6 @@ def process_issues(issues_dir, operational_issue_dir, input_dir):
                 for row in csv.DictReader(infile):
                     row["resource"] = resource
                     row["pipeline"] = pipeline
-                    w.writerow(row)
-
-    # Write to operational-issue.csv
-    operational_fields = [
-        "dataset",
-        "resource",
-        "line-number",
-        "entry-number",
-        "field",
-        "issue-type",
-        "value",
-        "message",
-        "entry-date",
-    ]
-    os.makedirs(operational_issue_dir, exist_ok=True)
-
-    with open(
-        os.path.join(operational_issue_dir, "operational-issue.csv"), "w", newline=""
-    ) as f:
-        w = csv.DictWriter(f, operational_fields)
-        w.writeheader()
-
-        for path in glob.glob(f"{operational_issue_dir}/*/operational-issue.csv"):
-            with open(path, newline="") as infile:
-                for row in csv.DictReader(infile):
                     w.writerow(row)
 
 

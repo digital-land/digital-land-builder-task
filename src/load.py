@@ -98,12 +98,6 @@ if __name__ == "__main__":
     create_parquet_from_table(
         specification_df, "specification", PARQUET_SPECIFICATION_DIR
     )
-    operational_issue_log = pd.read_csv(
-        "performance/operational_issue/operational-issue.csv"
-    )
-    operational_issue_log.to_sql(
-        "operational_issue", conn, if_exists="replace", index=False
-    )
 
     conn.execute(
         """

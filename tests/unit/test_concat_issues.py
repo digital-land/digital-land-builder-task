@@ -58,8 +58,6 @@ def test_excluded_dataset_issues_are_not_written(tmp_path):
         [
             "--issues-dir",
             str(out),
-            "--operational-issue-dir",
-            str(tmp_path / "op"),
             "--input-dir",
             str(input_dir),
         ],

@@ -1,5 +1,4 @@
 import download_collection
-import download_operational_issues
 import download_pipeline
 
 
@@ -32,18 +31,3 @@ def test_pipeline_url_map(tmp_path):
     assert len(url_map) == len(download_pipeline.PIPELINE_FILES)
     assert url_map[f"{base}/column.csv"] == "var/pipeline/ancient-woodland/column.csv"
     assert url_map[f"{base}/plugins.py"] == "var/pipeline/ancient-woodland/plugins.py"
-
-
-def test_operational_issues_url_map(tmp_path):
-    spec = tmp_path / "specification"
-    spec.mkdir()
-    (spec / "dataset.csv").write_text(
-        "dataset\nbrownfield-land\n\n"
-    )  # blank row ignored
-
-    url_map = download_operational_issues.build_url_map(str(spec), timestamp=123)
-
-    assert url_map == {
-        "https://files.planning.data.gov.uk/performance/operational_issue/"
-        "brownfield-land/operational-issue.csv?version=123": "performance/operational_issue/brownfield-land/operational-issue.csv",
-    }
