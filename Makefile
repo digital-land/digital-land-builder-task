@@ -28,6 +28,8 @@ REPOSITORY=digital-land-builder
 HOISTED_COLLECTION_DATASET_BUCKET_NAME= $(COLLECTION_DATASET_BUCKET_NAME)
 
 include makerules/makerules.mk
+# This task never runs GDAL, so skip the GDAL install check in makerules/pipeline.mk init.
+override GDAL := not-used
 include makerules/pipeline.mk
 include makerules/datapackage.mk
 include makerules/development.mk
