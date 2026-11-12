@@ -4,7 +4,7 @@ FROM python:3.8-slim-bookworm
 WORKDIR /
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install -y curl git make sqlite3 sudo gdal-bin time libsqlite3-mod-spatialite wget build-essential
+RUN apt-get install -y curl git make sqlite3 sudo gdal-bin time libsqlite3-mod-spatialite wget build-essential openssh-client-
 
 COPY . /src
 WORKDIR /src
