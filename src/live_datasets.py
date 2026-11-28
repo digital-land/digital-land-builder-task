@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def live_datasets(specification_dir, env):
+def live_datasets(specification_dir, env, config_path="config/pipeline/dataset.csv"):
     """The datasets the platform builds in `env` and has not retired.
 
     Mirrors is_dataset_available in airflow-dags (dags/utils.py) and
@@ -29,11 +29,14 @@ def live_datasets(specification_dir, env):
     if env == "development":
         available.add("development")
 
+    with open(config_path, newline="") as f:
+        environments = {row["dataset"]: row["environment"] for row in csv.DictReader(f)}
+
     with open(f"{specification_dir}/dataset.csv", newline="") as f:
         datasets = {
             row["dataset"]
             for row in csv.DictReader(f)
-            if row["environment"] in available and not row["end-date"]
+            if environments.get(row["dataset"], "") in available and not row["end-date"]
         }
 
     if not datasets:

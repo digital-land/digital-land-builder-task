@@ -85,6 +85,9 @@ specification::
 	curl -qfsL '$(SOURCE_URL)/specification/main/specification/fund.csv' > specification/fund.csv
 	curl -qfsL '$(SOURCE_URL)/specification/main/specification/award.csv' > specification/award.csv
 	curl -qfsL '$(SOURCE_URL)/specification/main/specification/quality.csv' > specification/quality.csv
+	# config
+	@mkdir -p config/pipeline
+	curl -qfsL '$(SOURCE_URL)/config/main/pipeline/dataset.csv' > config/pipeline/dataset.csv
 
 init::	specification
 
